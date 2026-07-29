@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: pickle-store-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: pickle_store
+      POSTGRES_USER: pickle_user
+      POSTGRES_PASSWORD: pickle_password
+
+    ports:
+      - "55432:5432"
+
+    volumes:
+      - pickle_store_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pickle_user -d pickle_store"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pickle_store_postgres_data:
