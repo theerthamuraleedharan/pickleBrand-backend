@@ -96,11 +96,15 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(
-            HttpSecurity http
+            HttpSecurity http, JwtAuthenticationConverter jwtConverter
     ) throws Exception {
 
         return http
                 .csrf(csrf -> csrf.disable())
+
+                .cors(cors -> cors.configurationSource(
+                        corsConfigurationSource()
+                ))
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -109,35 +113,41 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // Allow internal error handling
+
                         .dispatcherTypeMatchers(
                                 DispatcherType.ERROR
                         ).permitAll()
+
                         .requestMatchers("/error").permitAll()
 
-                        // Public authentication endpoints
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/auth/register",
-                                "/api/auth/login"
+                                "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/api/auth/logout"
                         ).permitAll()
 
-                        // Public product catalogue
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/products",
                                 "/api/products/**"
                         ).permitAll()
 
-                        // Everything else requires authentication
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+
+                        .anyRequest()
+                        .authenticated()
                 )
 
                 .oauth2ResourceServer(resourceServer ->
-                        resourceServer.jwt(jwt -> {
-                        })
+                        resourceServer.jwt(jwt ->
+                                jwt.jwtAuthenticationConverter(
+                                        jwtConverter
+                                )
+                        )
                 )
-
                 .build();
     }
 

@@ -6,9 +6,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import sujus.pickle.auth.token.RefreshTokenService;
 import sujus.pickle.security.*;
 import sujus.pickle.user.*;
 
+import javax.naming.AuthenticationException;
 import java.util.Locale;
 
 @Service
@@ -19,19 +21,22 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             AuthenticationManager authenticationManager,
             JwtService jwtService,
-            JwtProperties jwtProperties
+            JwtProperties jwtProperties,
+            RefreshTokenService refreshTokenService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.jwtProperties = jwtProperties;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -53,29 +58,34 @@ public class AuthService {
                 Role.CUSTOMER
         );
 
+
+
         AppUser savedUser = userRepository.save(user);
 
-        return createResponse(savedUser);
+        // Generate the access token before saving refresh token.
+        String accessToken = jwtService.generateAccessToken(savedUser);
+
+        RefreshTokenService.IssuedRefreshToken refreshToken =
+                refreshTokenService.issue(savedUser);
+
+        return createResponse(
+                savedUser,
+                accessToken,
+                refreshToken.value()
+        );
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         String email = normalizeEmail(request.email());
 
-        try {
-            authenticationManager.authenticate(
-                    UsernamePasswordAuthenticationToken
-                            .unauthenticated(
-                                    email,
-                                    request.password()
-                            )
-            );
-        } catch (BadCredentialsException exception) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Invalid email or password"
-            );
-        }
+        authenticationManager.authenticate(
+                UsernamePasswordAuthenticationToken
+                        .unauthenticated(
+                                email,
+                                request.password()
+                        )
+        );
 
         AppUser user = userRepository
                 .findByEmailIgnoreCase(email)
@@ -86,16 +96,60 @@ public class AuthService {
                         )
                 );
 
-        return createResponse(user);
+        String accessToken =
+                jwtService.generateAccessToken(user);
+
+        RefreshTokenService.IssuedRefreshToken refreshToken =
+                refreshTokenService.issue(user);
+
+        return createResponse(
+                user,
+                accessToken,
+                refreshToken.value()
+        );
     }
 
-    private AuthResponse createResponse(AppUser user) {
-        String token = jwtService.generateToken(user);
+    @Transactional
+    public AuthResponse refresh(
+            RefreshTokenRequest request
+    ) {
+
+        RefreshTokenService.RotationResult result =
+                refreshTokenService.rotate(
+                        request.refreshToken()
+                );
+
+        String accessToken =
+                jwtService.generateAccessToken(result.user());
+
+        return createResponse(
+                result.user(),
+                accessToken,
+                result.refreshToken().value()
+        );
+    }
+
+    @Transactional
+    public void logout(
+            RefreshTokenRequest request
+    ) {
+        refreshTokenService.revoke(
+                request.refreshToken()
+        );
+    }
+
+    private AuthResponse createResponse(
+            AppUser user,
+            String accessToken,
+            String refreshToken
+    ) {
 
         return new AuthResponse(
-                token,
+                accessToken,
+                refreshToken,
                 "Bearer",
-                jwtProperties.expirationMinutes() * 60,
+                jwtProperties.accessTokenExpiresInSeconds(),
+                jwtProperties.refreshTokenExpiresInSeconds(),
                 new AuthResponse.UserResponse(
                         user.getId(),
                         user.getFirstName(),

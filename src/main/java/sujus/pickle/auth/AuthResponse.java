@@ -2,8 +2,10 @@ package sujus.pickle.auth;
 
 public record AuthResponse(
         String accessToken,
+        String refreshToken,
         String tokenType,
-        long expiresInSeconds,
+        long accessTokenExpiresInSeconds,
+        long refreshTokenExpiresInSeconds,
         UserResponse user
 ) {
 

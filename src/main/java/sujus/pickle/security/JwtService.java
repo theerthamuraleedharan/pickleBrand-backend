@@ -1,5 +1,6 @@
 package sujus.pickle.security;
 
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 import sujus.pickle.user.AppUser;
@@ -21,18 +22,19 @@ public class JwtService {
         this.jwtProperties = jwtProperties;
     }
 
-    public String generateToken(AppUser user) {
-        Instant now = Instant.now();
-        Instant expiresAt = now.plus(
-                jwtProperties.expirationMinutes(),
+    public String generateAccessToken(AppUser user) {
+        Instant issuedAt = Instant.now();
+
+        Instant expiresAt = issuedAt.plus(
+                jwtProperties.accessTokenExpirationMinutes(),
                 ChronoUnit.MINUTES
         );
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("sujus-pickle-api")
-                .issuedAt(now)
-                .expiresAt(expiresAt)
                 .subject(user.getEmail())
+                .issuedAt(issuedAt)
+                .expiresAt(expiresAt)
                 .claim("userId", user.getId())
                 .claim("firstName", user.getFirstName())
                 .claim("lastName", user.getLastName())
@@ -40,7 +42,7 @@ public class JwtService {
                 .build();
 
         JwsHeader header = JwsHeader
-                .with(() -> "HS256")
+                .with(MacAlgorithm.HS256)
                 .build();
 
         return jwtEncoder

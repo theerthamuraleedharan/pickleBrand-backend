@@ -30,5 +30,6 @@ logging:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:change-this-local-development-secret-key-32-characters-minimum}
-    expiration-minutes: 60
+    secret: ${JWT_SECRET:change-this-local-development-secret-key-at-least-32-bytes}
+    access-token-expiration-minutes: 15
+    refresh-token-expiration-days: 7
