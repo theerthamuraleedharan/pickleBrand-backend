@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import sujus.pickle.auth.token.RefreshTokenService;
+import sujus.pickle.common.EmailAlreadyExistsException;
 import sujus.pickle.security.*;
 import sujus.pickle.user.*;
 
@@ -44,9 +45,8 @@ public class AuthService {
         String email = normalizeEmail(request.email());
 
         if (userRepository.existsByEmailIgnoreCase(email)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "An account already exists for this email"
+            throw new EmailAlreadyExistsException(
+                    "An account already exists for this email. Please log in instead."
             );
         }
 
