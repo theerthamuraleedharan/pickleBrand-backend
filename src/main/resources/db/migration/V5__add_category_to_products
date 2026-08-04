@@ -1,0 +1,12 @@
+ALTER TABLE products
+ADD COLUMN category VARCHAR(20) NOT NULL DEFAULT 'VEG';
+
+ALTER TABLE products
+ADD CONSTRAINT chk_products_category
+CHECK (category IN ('VEG', 'NON_VEG', 'MIXED'));
+
+CREATE INDEX idx_products_category
+ON products(category);
+
+ALTER TABLE products
+ALTER COLUMN category DROP DEFAULT;

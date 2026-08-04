@@ -44,6 +44,10 @@ public class Product {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ProductCategory category;
+
     protected Product() {
     }
 
@@ -55,7 +59,8 @@ public class Product {
             Integer weightGrams,
             SpiceLevel spiceLevel,
             String imageUrl,
-            boolean active
+            boolean active,
+            ProductCategory category
     ) {
         this.name = name;
         this.description = description;
@@ -65,6 +70,7 @@ public class Product {
         this.spiceLevel = spiceLevel;
         this.imageUrl = imageUrl;
         this.active = active;
+        this.category = category;
     }
 
     @PrePersist
@@ -87,7 +93,8 @@ public class Product {
             Integer weightGrams,
             SpiceLevel spiceLevel,
             String imageUrl,
-            boolean active
+            boolean active,
+            ProductCategory category
     ) {
         this.name = name;
         this.description = description;
@@ -97,6 +104,7 @@ public class Product {
         this.spiceLevel = spiceLevel;
         this.imageUrl = imageUrl;
         this.active = active;
+        this.category = category;
     }
 
     public Long getId() {
@@ -141,5 +149,13 @@ public class Product {
 
     public OffsetDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public ProductCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(ProductCategory category) {
+        this.category = category;
     }
 }

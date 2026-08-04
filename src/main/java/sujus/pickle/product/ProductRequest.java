@@ -32,6 +32,9 @@ public record ProductRequest(
         @Size(max = 500)
         String imageUrl,
 
-        Boolean active
+        Boolean active,
+
+        @NotNull(message = "Product category is required")
+        ProductCategory category
 ) {
 }

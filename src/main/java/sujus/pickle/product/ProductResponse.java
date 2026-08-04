@@ -14,7 +14,9 @@ public record ProductResponse(
         String imageUrl,
         boolean active,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+
+        ProductCategory category
 ) {
 
     public static ProductResponse from(Product product) {
@@ -29,7 +31,8 @@ public record ProductResponse(
                 product.getImageUrl(),
                 product.isActive(),
                 product.getCreatedAt(),
-                product.getUpdatedAt()
+                product.getUpdatedAt(),
+                product.getCategory()
         );
     }
 }

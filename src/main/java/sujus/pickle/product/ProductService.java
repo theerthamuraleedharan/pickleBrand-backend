@@ -47,7 +47,8 @@ public class ProductService {
                 request.weightGrams(),
                 request.spiceLevel(),
                 normalizeUrl(request.imageUrl()),
-                request.active() == null || request.active()
+                request.active() == null || request.active(),
+                request.category()
         );
 
         return ProductResponse.from(productRepository.save(product));
