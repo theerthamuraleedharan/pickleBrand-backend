@@ -37,6 +37,14 @@ public class AppUser {
     protected AppUser() {
     }
 
+    public void updateName(
+            String firstName,
+            String lastName
+    ) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public AppUser(
             String firstName,
             String lastName,

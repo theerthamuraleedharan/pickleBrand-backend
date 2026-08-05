@@ -1,6 +1,10 @@
 spring:
   application:
     name: pickle-store-backend
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
 
   datasource:
     url: jdbc:postgresql://127.0.0.1:55432/pickle_store
@@ -35,3 +39,5 @@ app:
     secret: ${JWT_SECRET:change-this-local-development-secret-key-at-least-32-bytes}
     access-token-expiration-minutes: 15
     refresh-token-expiration-days: 7
+  storage:
+    profile-images: uploads/profile-images
