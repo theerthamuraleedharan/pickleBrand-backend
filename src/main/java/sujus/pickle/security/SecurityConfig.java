@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.*;
 
@@ -76,35 +77,26 @@ public class SecurityConfig {
 
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter =
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        authoritiesConverter.setAuthoritiesClaimName("role");
+        authoritiesConverter.setAuthorityPrefix("ROLE_");
+
+        JwtAuthenticationConverter authenticationConverter =
                 new JwtAuthenticationConverter();
 
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            String role = jwt.getClaimAsString("role");
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(
+                authoritiesConverter
+        );
 
-            if (role == null || role.isBlank()) {
-                return List.of();
-            }
-
-            return List.of(
-                    new SimpleGrantedAuthority("ROLE_" + role)
-            );
-        });
-
-        return converter;
+        return authenticationConverter;
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(
-            HttpSecurity http, JwtAuthenticationConverter jwtConverter
-    ) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
                 .csrf(csrf -> csrf.disable())
-
-                .cors(cors -> cors.configurationSource(
-                        corsConfigurationSource()
-                ))
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -113,12 +105,12 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-
                         .dispatcherTypeMatchers(
                                 DispatcherType.ERROR
                         ).permitAll()
 
-                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/error")
+                        .permitAll()
 
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -144,10 +136,11 @@ public class SecurityConfig {
                 .oauth2ResourceServer(resourceServer ->
                         resourceServer.jwt(jwt ->
                                 jwt.jwtAuthenticationConverter(
-                                        jwtConverter
+                                        jwtAuthenticationConverter()
                                 )
                         )
                 )
+
                 .build();
     }
 
