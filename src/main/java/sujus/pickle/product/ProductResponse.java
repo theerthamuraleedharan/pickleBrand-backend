@@ -19,7 +19,16 @@ public record ProductResponse(
         ProductCategory category
 ) {
 
+
     public static ProductResponse from(Product product) {
+
+        String imageUrl =
+                product.getImageName() == null
+                        ? null
+                        : "/api/products/"
+                        + product.getId()
+                        + "/photo";
+
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
@@ -28,7 +37,7 @@ public record ProductResponse(
                 product.getStockQuantity(),
                 product.getWeightGrams(),
                 product.getSpiceLevel(),
-                product.getImageUrl(),
+                imageUrl,
                 product.isActive(),
                 product.getCreatedAt(),
                 product.getUpdatedAt(),
