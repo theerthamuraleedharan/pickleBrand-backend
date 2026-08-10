@@ -3,8 +3,8 @@ spring:
     name: pickle-store-backend
   servlet:
     multipart:
-      max-file-size: 2MB
-      max-request-size: 2MB
+      max-file-size: 5MB
+      max-request-size: 6MB
 
   datasource:
     url: jdbc:postgresql://127.0.0.1:55432/pickle_store
@@ -41,3 +41,4 @@ app:
     refresh-token-expiration-days: 7
   storage:
     profile-images: uploads/profile-images
+    product-images: uploads/product-images

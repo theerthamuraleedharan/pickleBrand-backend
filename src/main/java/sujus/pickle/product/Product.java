@@ -35,6 +35,9 @@ public class Product {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Column(name = "image_name", length = 255)
+    private String imageName;
+
     @Column(nullable = false)
     private boolean active;
 
@@ -85,16 +88,15 @@ public class Product {
         updatedAt = OffsetDateTime.now();
     }
 
-    public void update(
+    public Product(
             String name,
             String description,
             BigDecimal price,
             Integer stockQuantity,
             Integer weightGrams,
             SpiceLevel spiceLevel,
-            String imageUrl,
-            boolean active,
-            ProductCategory category
+            ProductCategory category,
+            boolean active
     ) {
         this.name = name;
         this.description = description;
@@ -102,9 +104,28 @@ public class Product {
         this.stockQuantity = stockQuantity;
         this.weightGrams = weightGrams;
         this.spiceLevel = spiceLevel;
-        this.imageUrl = imageUrl;
-        this.active = active;
         this.category = category;
+        this.active = active;
+    }
+
+    public void update(
+            String name,
+            String description,
+            BigDecimal price,
+            Integer stockQuantity,
+            Integer weightGrams,
+            SpiceLevel spiceLevel,
+            ProductCategory category,
+            boolean active
+    ) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+        this.weightGrams = weightGrams;
+        this.spiceLevel = spiceLevel;
+        this.category = category;
+        this.active = active;
     }
 
     public Long getId() {
@@ -157,5 +178,21 @@ public class Product {
 
     public void setCategory(ProductCategory category) {
         this.category = category;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public void updateImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public void removeImage() {
+        this.imageName = null;
     }
 }
