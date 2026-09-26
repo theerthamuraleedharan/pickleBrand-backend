@@ -87,7 +87,7 @@ public class RefreshTokenService {
 
         refreshTokenRepository
                 .findForUpdateByTokenHash(tokenHash)
-                .ifPresent(RefreshToken::revoke);
+                .ifPresent(token -> token.revoke());
     }
 
     private String generateRandomToken() {

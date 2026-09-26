@@ -132,6 +132,13 @@ public class Product {
         return id;
     }
 
+    public void deductStock(int quantity) {
+        if (quantity <= 0 || quantity > stockQuantity) {
+            throw new IllegalArgumentException("Invalid stock deduction");
+        }
+        stockQuantity -= quantity;
+    }
+
     public String getName() {
         return name;
     }

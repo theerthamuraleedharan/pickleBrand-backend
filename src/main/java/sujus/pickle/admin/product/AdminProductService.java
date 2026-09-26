@@ -107,7 +107,7 @@ public class AdminProductService {
             MultipartFile photo
     ) {
 
-        Product product = findProduct(productId);
+        Product product = findProductForUpdate(productId);
 
         String previousImage = product.getImageName();
 
@@ -170,7 +170,7 @@ public class AdminProductService {
             Long productId
     ) {
         Product product =
-                findProduct(productId);
+                findProductForUpdate(productId);
 
         String imageName =
                 product.getImageName();
@@ -192,5 +192,10 @@ public class AdminProductService {
                                 "Product was not found"
                         )
                 );
+    }
+
+    private Product findProductForUpdate(Long productId) {
+        return productRepository.findForUpdateById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product was not found"));
     }
 }

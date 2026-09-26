@@ -239,7 +239,7 @@ public class ProfileService {
                     )
                     .stream()
                     .findFirst()
-                    .ifPresent(Address::makeDefault);
+                    .ifPresent(nextAddress -> nextAddress.makeDefault());
         }
     }
 

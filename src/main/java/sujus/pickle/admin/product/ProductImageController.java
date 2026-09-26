@@ -1,9 +1,10 @@
-package sujus.pickle.product;
+package sujus.pickle.admin.product;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import sujus.pickle.admin.product.ProductImageStorageService;
+import sujus.pickle.product.Product;
+import sujus.pickle.product.ProductRepository;
 
 @RestController
 @RequestMapping("/api/products")

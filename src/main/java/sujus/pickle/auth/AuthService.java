@@ -11,7 +11,6 @@ import sujus.pickle.common.EmailAlreadyExistsException;
 import sujus.pickle.security.*;
 import sujus.pickle.user.*;
 
-import javax.naming.AuthenticationException;
 import java.util.Locale;
 
 @Service
