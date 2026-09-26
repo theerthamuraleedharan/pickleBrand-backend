@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.*;
@@ -93,10 +92,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityErrorHandler errors) throws Exception {
 
         return http
                 .csrf(csrf -> csrf.disable())
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(errors).accessDeniedHandler(errors))
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -134,7 +135,7 @@ public class SecurityConfig {
                 )
 
                 .oauth2ResourceServer(resourceServer ->
-                        resourceServer.jwt(jwt ->
+                        resourceServer.authenticationEntryPoint(errors).accessDeniedHandler(errors).jwt(jwt ->
                                 jwt.jwtAuthenticationConverter(
                                         jwtAuthenticationConverter()
                                 )
@@ -166,11 +167,13 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
-                List.of("Authorization", "Content-Type")
+                List.of("Authorization", "Content-Type", "Idempotency-Key")
         );
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
+
+        configuration.setExposedHeaders(List.of("Location", "Idempotency-Replayed"));
 
         source.registerCorsConfiguration(
                 "/api/**",
