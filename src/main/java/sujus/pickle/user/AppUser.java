@@ -21,7 +21,8 @@ public class AppUser {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 100)
+    // Null for externally authenticated users: the application never stores their IdP password.
+    @Column(name = "password_hash", length = 100)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)

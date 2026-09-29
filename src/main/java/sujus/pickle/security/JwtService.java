@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 public class JwtService {
+    public static final String ISSUER = "sujus-pickle-api";
 
     private final JwtEncoder jwtEncoder;
     private final JwtProperties jwtProperties;
@@ -31,7 +32,7 @@ public class JwtService {
         );
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("sujus-pickle-api")
+                .issuer(ISSUER)
                 .subject(user.getEmail())
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)

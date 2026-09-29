@@ -20,7 +20,9 @@ public class ApiSecurityErrorHandler implements AuthenticationEntryPoint, Access
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
             throws IOException {
         response.setHeader("WWW-Authenticate", "Bearer");
-        write(request, response, 401, "Unauthorized", "Please log in with a valid access token");
+        String message = exception instanceof sujus.pickle.security.oidc.IdentityLinkRequiredException
+                ? exception.getMessage() : "Please log in with a valid access token";
+        write(request, response, 401, "Unauthorized", message);
     }
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception)

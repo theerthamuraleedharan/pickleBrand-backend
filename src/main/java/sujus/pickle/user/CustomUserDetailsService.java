@@ -26,6 +26,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                         )
                 );
 
+        // OIDC-only accounts have no local password and cannot use the legacy login.
+        if (user.getPasswordHash() == null) {
+            throw new UsernameNotFoundException("Local password login is not available");
+        }
+
         return User
                 .withUsername(user.getEmail())
                 .password(user.getPasswordHash())

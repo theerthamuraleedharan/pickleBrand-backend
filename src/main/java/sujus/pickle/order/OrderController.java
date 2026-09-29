@@ -3,8 +3,7 @@ package sujus.pickle.order;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sujus.pickle.common.CurrentUser;
 import java.net.URI;
@@ -18,9 +17,9 @@ public class OrderController {
     public record CheckoutRequest(@NotNull @Positive Long addressId) { }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> create(@AuthenticationPrincipal Jwt jwt,
+    public ResponseEntity<OrderResponse> create(Authentication authentication,
             @RequestHeader("Idempotency-Key") UUID key, @Valid @RequestBody CheckoutRequest request) {
-        var result = orders.create(CurrentUser.id(jwt), request.addressId(), key);
+        var result = orders.create(CurrentUser.id(authentication), request.addressId(), key);
         return ResponseEntity.status(result.replayed() ? 200 : 201)
                 .location(URI.create("/api/orders/" + result.order().id()))
                 .header("Idempotency-Replayed", Boolean.toString(result.replayed()))
@@ -28,14 +27,14 @@ public class OrderController {
     }
 
     @GetMapping
-    public OrderResponse.History history(@AuthenticationPrincipal Jwt jwt,
+    public OrderResponse.History history(Authentication authentication,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return orders.history(CurrentUser.id(jwt), page, size);
+        return orders.history(CurrentUser.id(authentication), page, size);
     }
 
     @GetMapping("/{orderId}")
-    public OrderResponse get(@AuthenticationPrincipal Jwt jwt, @PathVariable @Positive Long orderId) {
-        return orders.get(CurrentUser.id(jwt), orderId);
+    public OrderResponse get(Authentication authentication, @PathVariable @Positive Long orderId) {
+        return orders.get(CurrentUser.id(authentication), orderId);
     }
 }

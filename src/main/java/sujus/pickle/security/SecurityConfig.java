@@ -18,6 +18,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.*;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.converter.Converter;
 
 import sujus.pickle.user.CustomUserDetailsService;
 
@@ -63,18 +65,34 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("!oidc")
     JwtDecoder jwtDecoder(JwtProperties properties) {
         SecretKey key = secretKey(properties);
-
-        return NimbusJwtDecoder
+        NimbusJwtDecoder decoder = NimbusJwtDecoder
                 .withSecretKey(key)
                 .macAlgorithm(
                         org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256
                 )
                 .build();
+        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(JwtService.ISSUER));
+        return decoder;
     }
 
-    @Bean
+    @Bean("localJwtDecoder")
+    @Profile("oidc")
+    JwtDecoder localJwtDecoder(JwtProperties properties) {
+        SecretKey key = secretKey(properties);
+        NimbusJwtDecoder decoder = NimbusJwtDecoder
+                .withSecretKey(key)
+                .macAlgorithm(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256)
+                .build();
+        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(JwtService.ISSUER));
+        return decoder;
+    }
+
+    // The selected decoder verifies a token using only the key for its declared issuer.
+    @Bean("applicationJwtAuthenticationConverter")
+    @Profile("!oidc")
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
@@ -92,9 +110,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityErrorHandler errors) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityErrorHandler errors,
+            @Qualifier("applicationJwtAuthenticationConverter")
+            Converter<Jwt, ? extends AbstractAuthenticationToken> converter) throws Exception {
 
         return http
+                // These APIs accept explicit Authorization headers, not login cookies.
+                // If we later switch to cookie-based API authentication, revisit CSRF.
                 .csrf(csrf -> csrf.disable())
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(errors).accessDeniedHandler(errors))
@@ -137,7 +159,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(resourceServer ->
                         resourceServer.authenticationEntryPoint(errors).accessDeniedHandler(errors).jwt(jwt ->
                                 jwt.jwtAuthenticationConverter(
-                                        jwtAuthenticationConverter()
+                                        converter
                                 )
                         )
                 )
@@ -152,7 +174,10 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173",
+                        "http://localhost:5174"
+                )
         );
 
         configuration.setAllowedMethods(
