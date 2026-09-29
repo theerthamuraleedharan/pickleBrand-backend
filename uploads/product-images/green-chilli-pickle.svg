@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-labelledby="title desc">
+  <title id="title">Green chilli pickle</title>
+  <desc id="desc">A jar of green chilli pickle with fresh green chillies and mustard seeds.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8f8e9"/>
+      <stop offset="1" stop-color="#e0e6c6"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#73914a"/>
+      <stop offset=".2" stop-color="#a8bd5c"/>
+      <stop offset=".56" stop-color="#c2cf70"/>
+      <stop offset="1" stop-color="#617d3b"/>
+    </linearGradient>
+    <linearGradient id="pickle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#718d27"/>
+      <stop offset="1" stop-color="#354d18"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12"/>
+      <feOffset dy="12"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".2"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="640" height="640" rx="42" fill="url(#bg)"/>
+  <circle cx="105" cy="118" r="58" fill="#cdd9a8" opacity=".6"/>
+  <circle cx="535" cy="505" r="82" fill="#cdd9a8" opacity=".48"/>
+  <path d="M74 468h492" stroke="#71814e" stroke-width="7" stroke-linecap="round" opacity=".42"/>
+  <g filter="url(#shadow)">
+    <path d="M222 157h196v38c0 20 34 30 42 63l21 167c5 42-25 70-65 70H224c-40 0-70-28-65-70l21-167c8-33 42-43 42-63z" fill="url(#glass)" stroke="#536634" stroke-width="8"/>
+    <path d="M190 265c57-28 190-31 260 0l19 157c4 32-17 48-47 48H218c-30 0-51-16-47-48z" fill="url(#pickle)"/>
+    <path d="M185 265c74-30 199-30 270 0v24c-76-30-191-28-273 0z" fill="#c7c96b"/>
+    <path d="M218 157h204v41H218z" fill="#57462e"/>
+    <path d="M225 153h190v18H225z" fill="#7b6440"/>
+    <path d="M213 325c25-21 40-17 54 8s28 29 44 4 31-23 44 4 30 25 43 0 28-28 47-8" fill="none" stroke="#a8c344" stroke-width="18" stroke-linecap="round"/>
+    <path d="M213 377c25-21 40-17 54 8s28 29 44 4 31-23 44 4 30 25 43 0 28-28 47-8" fill="none" stroke="#91a936" stroke-width="18" stroke-linecap="round"/>
+    <rect x="199" y="336" width="242" height="82" rx="18" fill="#fff5d9" stroke="#d8c58c" stroke-width="4"/>
+    <path d="M221 382c12-25 25-32 39-28-4 19-17 34-39 28z" fill="#53803a"/>
+    <path d="M227 376l29-25M238 382l26-19" stroke="#2c6034" stroke-width="5" stroke-linecap="round"/>
+    <text x="343" y="371" text-anchor="middle" fill="#405a25" font-family="Georgia,serif" font-size="20" font-weight="700">GREEN CHILLI</text>
+    <text x="343" y="400" text-anchor="middle" fill="#67583a" font-family="Arial,sans-serif" font-size="14" letter-spacing="4">PICKLE</text>
+  </g>
+  <g transform="translate(468 154) rotate(18)">
+    <path d="M31 18c12 8 19 16 20 25 3 24-11 58-27 81-8 12-16 14-20 6C-6 108-1 78 8 52 14 34 21 23 31 18z" fill="#4e782c"/>
+    <path d="M31 20c5-10 11-15 20-18" fill="none" stroke="#365b29" stroke-width="7" stroke-linecap="round"/>
+    <path d="M24 39c6 19 5 40-3 62" fill="none" stroke="#87a742" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g fill="#a47b32" opacity=".8">
+    <circle cx="118" cy="398" r="7"/><circle cx="139" cy="421" r="5"/><circle cx="512" cy="259" r="6"/>
+    <circle cx="495" cy="281" r="4"/><circle cx="124" cy="445" r="4"/>
+  </g>
+</svg>
