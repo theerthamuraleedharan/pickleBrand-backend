@@ -1,0 +1,7 @@
+# Activate with SPRING_PROFILES_ACTIVE=oidc. Default mode keeps the existing login.
+# The issuer must exactly match the browser-visible realm URL (including port).
+app:
+  oidc:
+    issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8081/realms/sujus-pickle}
+    jwk-set-uri: ${OIDC_JWK_SET_URI:${app.oidc.issuer-uri}/protocol/openid-connect/certs}
+    audience: ${OIDC_AUDIENCE:pickle-api}

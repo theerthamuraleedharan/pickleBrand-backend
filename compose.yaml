@@ -1,4 +1,20 @@
 services:
+  # Local interview/demo IdP. Opt in with: docker compose --profile oidc up -d
+  # start-dev and these published demo passwords are not a production deployment.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.4
+    profiles: [oidc]
+    command: [start-dev, --import-realm]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: demo-admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-local-admin-change-me}
+      KC_HOSTNAME: http://localhost:8081
+    ports:
+      - "127.0.0.1:8081:8080"
+    volumes:
+      - keycloak_demo_data:/opt/keycloak/data
+      - ./dev/keycloak/sujus-pickle-realm.json:/opt/keycloak/data/import/sujus-pickle-realm.json:ro
+
   postgres:
     image: postgres:17-alpine
     container_name: pickle-store-postgres
@@ -22,4 +38,5 @@ services:
       retries: 5
 
 volumes:
+  keycloak_demo_data:
   pickle_store_postgres_data:

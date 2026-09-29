@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@org.springframework.test.context.ActiveProfiles("local")
 class CartCheckoutIntegrationTests extends PostgresIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired CartService carts;

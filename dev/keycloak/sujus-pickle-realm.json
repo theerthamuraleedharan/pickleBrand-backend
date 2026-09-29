@@ -1,0 +1,97 @@
+{
+  "realm": "sujus-pickle",
+  "enabled": true,
+  "displayName": "Sujus Pickle",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "roles": {
+    "client": {
+      "pickle-api": [{"name": "CUSTOMER"}, {"name": "ADMIN"}]
+    }
+  },
+  "clients": [
+    {
+      "clientId": "pickle-api",
+      "name": "Sujus Pickle API",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "bearerOnly": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "pickle-react",
+      "name": "Sujus Pickle web app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": false,
+      "redirectUris": ["http://localhost:5173/oidc/callback"],
+      "webOrigins": ["http://localhost:5173"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/login"
+      },
+      "defaultClientScopes": ["basic", "profile", "email"],
+      "protocolMappers": [
+        {
+          "name": "API audience in access tokens only",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "pickle-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "API roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "config": {
+            "usermodel.clientRoleMapping.clientId": "pickle-api",
+            "claim.name": "resource_access.pickle-api.roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "clientScopeMappings": {
+    "pickle-api": [{"client": "pickle-react", "roles": ["CUSTOMER", "ADMIN"]}]
+  },
+  "users": [
+    {
+      "username": "demo-customer",
+      "enabled": true,
+      "email": "oidc-customer@example.test",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Customer",
+      "credentials": [{"type": "password", "value": "Customer-demo-2026!", "temporary": false}],
+      "clientRoles": {"pickle-api": ["CUSTOMER"]}
+    },
+    {
+      "username": "demo-store-admin",
+      "enabled": true,
+      "email": "oidc-admin@example.test",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Administrator",
+      "credentials": [{"type": "password", "value": "Admin-demo-2026!", "temporary": false}],
+      "clientRoles": {"pickle-api": ["CUSTOMER", "ADMIN"]}
+    }
+  ]
+}
