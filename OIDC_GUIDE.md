@@ -152,12 +152,22 @@ The Keycloak container uses `start-dev`, a persistent demo data volume and publi
 demo credentials. Its host port is bound to loopback. This is for local learning only.
 A deployment requires HTTPS, real secrets, a production Keycloak database and operations
 configuration, a stable issuer hostname, and environment-specific callback/CORS URLs.
+Configure `APP_CORS_ALLOWED_ORIGINS` on the backend as a comma-separated list of exact
+frontend origins (scheme, host, and port; no paths), for example
+`https://shop.example.com`. Keep the default localhost origins for development only.
+Register the production frontend callback and post-logout URLs on the Keycloak
+`pickle-react` client. Configure the Google identity provider in Keycloak with the Google
+client ID and secret, and register Keycloak's broker callback
+`https://<keycloak-host>/realms/sujus-pickle/broker/google/endpoint` in the Google OAuth
+client. Do not put the Google client secret in the React app or backend configuration.
 Keycloak startup import skips realms that already exist; later edits to the JSON do not
 overwrite a live realm. Update it deliberately in the admin console or use a separate
 disposable demo instance rather than deleting your application database volume.
 
 The React app presents the regular customer email/password login and registration forms,
-plus a Keycloak sign-in option. Its `.env.oidc` should contain:
+plus Keycloak and Google sign-in options. Google is configured as an identity provider in
+Keycloak; the React Google button starts Keycloak login with the `google` identity-provider
+hint. Its `.env.oidc` should contain:
 
 ```dotenv
 VITE_AUTH_MODE=oidc
