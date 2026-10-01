@@ -92,6 +92,94 @@ class CartCheckoutIntegrationTests extends PostgresIntegrationTest {
     }
 
     @Test
+    void checkoutCanUseSeparateSavedBillingAddressAndSnapshotsBothAddresses() {
+        Address billingAddress = addresses.save(new Address(alice, "Alice Billing", "9876543210",
+                "20 Billing Street", null, "Thrissur", "Karnataka", "680001", "India", false));
+        carts.add(alice.getId(), product.getId(), 2);
+
+        var result = orders.create(alice.getId(), aliceAddress.getId(), billingAddress.getId(), UUID.randomUUID());
+
+        assertThat(result.order().deliveryAddress().getCity()).isEqualTo("Kochi");
+        assertThat(result.order().billingAddress().getCity()).isEqualTo("Thrissur");
+        assertThat(result.order().billingAddress().getAddressLine1()).isEqualTo("20 Billing Street");
+        addresses.deleteById(billingAddress.getId());
+        assertThat(orders.get(alice.getId(), result.order().id()).billingAddress().getCity()).isEqualTo("Thrissur");
+    }
+
+    @Test
+    void checkoutDefaultsBillingToDeliveryAndRejectsAnotherUsersBillingAddress() {
+        carts.add(alice.getId(), product.getId(), 1);
+        var result = orders.create(alice.getId(), aliceAddress.getId(), UUID.randomUUID());
+        assertThat(result.order().billingAddress().getCity()).isEqualTo("Kochi");
+
+        carts.add(alice.getId(), product.getId(), 1);
+        assertThatThrownBy(() -> orders.create(alice.getId(), aliceAddress.getId(),
+                bobAddress.getId(), UUID.randomUUID()))
+                .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
+        assertThat(carts.get(alice.getId()).itemCount()).isEqualTo(1);
+    }
+
+    @Test
+    void buyNowPlacesCodOrderWithoutChangingCartAndIsIdempotent() throws Exception {
+        carts.add(alice.getId(), product.getId(), 2);
+        String key = UUID.randomUUID().toString();
+        String body = "{\"productId\":" + product.getId() + ",\"quantity\":3,\"addressId\":"
+                + aliceAddress.getId() + "}";
+
+        mvc.perform(post("/api/orders/buy-now").header("Authorization", bearer(alice))
+                        .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Idempotency-Replayed", "false"))
+                .andExpect(jsonPath("$.status").value("PLACED"))
+                .andExpect(jsonPath("$.paymentStatus").value("UNPAID"))
+                .andExpect(jsonPath("$.paymentMethod").value("CASH_ON_DELIVERY"))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].quantity").value(3))
+                .andExpect(jsonPath("$.subtotal").value(360.75))
+                .andExpect(jsonPath("$.deliveryCharge").value(0))
+                .andExpect(jsonPath("$.tax").value(0))
+                .andExpect(jsonPath("$.total").value(360.75))
+                .andExpect(jsonPath("$.billingAddress.city").value("Kochi"));
+
+        assertThat(carts.get(alice.getId()).itemCount()).isEqualTo(2);
+        assertThat(products.findById(product.getId()).orElseThrow().getStockQuantity()).isEqualTo(7);
+        mvc.perform(post("/api/orders/buy-now").header("Authorization", bearer(alice))
+                        .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotency-Replayed", "true"));
+        assertThat(products.findById(product.getId()).orElseThrow().getStockQuantity()).isEqualTo(7);
+        assertThat(carts.get(alice.getId()).itemCount()).isEqualTo(2);
+        mvc.perform(post("/api/orders/buy-now").header("Authorization", bearer(alice))
+                        .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"productId\":" + product.getId() + ",\"quantity\":1,\"addressId\":"
+                                + aliceAddress.getId() + "}"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void buyNowValidatesQuantityAvailabilityAndAddressOwnership() throws Exception {
+        String key = UUID.randomUUID().toString();
+        String base = "{\"productId\":" + product.getId() + ",\"quantity\":1,\"addressId\":";
+        mvc.perform(post("/api/orders/buy-now").header("Authorization", bearer(alice))
+                        .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON)
+                        .content(base + bobAddress.getId() + "}"))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/api/orders/buy-now").header("Authorization", bearer(alice))
+                        .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"productId\":" + product.getId() + ",\"quantity\":1.0,\"addressId\":"
+                                + aliceAddress.getId() + "}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/orders/buy-now").header("Authorization", bearer(alice))
+                        .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"productId\":" + product.getId() + ",\"quantity\":11,\"addressId\":"
+                                + aliceAddress.getId() + "}"))
+                .andExpect(status().isConflict());
+        assertThat(orders.history(alice.getId(), 0, 20).totalElements()).isZero();
+        assertThat(products.findById(product.getId()).orElseThrow().getStockQuantity()).isEqualTo(10);
+    }
+
+    @Test
     void cartValidatesStrictQuantitiesAndStock() throws Exception {
         for (String value : List.of("0", "-1", "1.5", "1.0", "null", "\"2\"", "2147483648")) {
             mvc.perform(post("/api/cart/items").header("Authorization", bearer(alice))
@@ -139,11 +227,13 @@ class CartCheckoutIntegrationTests extends PostgresIntegrationTest {
         jdbc.update("UPDATE products SET price=130.45 WHERE id=?", product.getId());
         var result = orders.create(alice.getId(), aliceAddress.getId(), UUID.randomUUID());
         assertThat(result.order().subtotal()).isEqualByComparingTo("391.35");
-        assertThat(result.order().status()).isEqualTo(CustomerOrder.Status.AWAITING_QUOTE);
+        assertThat(result.order().status()).isEqualTo(CustomerOrder.Status.PLACED);
         assertThat(result.order().paymentStatus()).isEqualTo(CustomerOrder.PaymentStatus.UNPAID);
-        assertThat(result.order().total()).isNull();
-        assertThat(result.order().deliveryCharge()).isNull();
-        assertThat(result.order().tax()).isNull();
+        assertThat(result.order().paymentMethod()).isEqualTo(CustomerOrder.PaymentMethod.CASH_ON_DELIVERY);
+        assertThat(result.order().total()).isEqualByComparingTo("391.35");
+        assertThat(result.order().deliveryCharge()).isEqualByComparingTo("0.00");
+        assertThat(result.order().tax()).isEqualByComparingTo("0.00");
+        assertThat(result.order().billingAddress().getCity()).isEqualTo("Kochi");
         assertThat(carts.get(alice.getId()).items()).isEmpty();
         assertThat(products.findById(product.getId()).orElseThrow().getStockQuantity()).isEqualTo(7);
         products.deleteById(product.getId());
@@ -280,7 +370,10 @@ class CartCheckoutIntegrationTests extends PostgresIntegrationTest {
                         .content("{\"addressId\":" + aliceAddress.getId()
                                 + ",\"total\":0.01,\"subtotal\":0.01,\"paymentStatus\":\"PAID\",\"userId\":" + bob.getId() + "}"))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.subtotal").value(240.50))
-                .andExpect(jsonPath("$.paymentStatus").value("UNPAID"));
+                .andExpect(jsonPath("$.paymentStatus").value("UNPAID"))
+                .andExpect(jsonPath("$.paymentMethod").value("CASH_ON_DELIVERY"))
+                .andExpect(jsonPath("$.total").value(240.50))
+                .andExpect(jsonPath("$.billingAddress.city").value("Kochi"));
         assertThat(orders.history(bob.getId(), 0, 20).totalElements()).isZero();
         // Existing public catalog routes remain accessible without a token.
         mvc.perform(get("/api/products")).andExpect(status().isOk());
