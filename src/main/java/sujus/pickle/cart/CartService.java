@@ -16,6 +16,7 @@ import java.util.*;
 @Service
 @Transactional
 public class CartService {
+    // Manages the signed-in user's cart, inventory validation, and cart import replay checks.
     private final CartItemRepository items;
     private final CartImportRepository imports;
     private final ProductRepository products;
@@ -35,17 +36,20 @@ public class CartService {
                 new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please log in again"));
     }
 
+    // Returns the current cart contents for the signed-in user.
     public CartResponse get(Long userId) {
         lockUser(userId);
         return response(userId);
     }
 
+    // Adds a product to the cart or increments its existing quantity while keeping inventory checks enforced.
     public CartResponse add(Long userId, Long productId, int quantity) {
         lockUser(userId);
         setQuantity(userId, productId, quantity, true);
         return response(userId);
     }
 
+    // Replaces the quantity for an existing cart item instead of incrementing it.
     public CartResponse replace(Long userId, Long productId, int quantity) {
         lockUser(userId);
         if (items.findByUserIdAndProductId(userId, productId).isEmpty()) {
@@ -55,18 +59,21 @@ public class CartService {
         return response(userId);
     }
 
+    // Removes a specific product from the current cart.
     public CartResponse remove(Long userId, Long productId) {
         lockUser(userId);
         items.deleteByUserIdAndProductId(userId, productId);
         return response(userId);
     }
 
+    // Empties the cart for the authenticated user.
     public CartResponse clear(Long userId) {
         lockUser(userId);
         items.deleteAllByUserId(userId);
         return response(userId);
     }
 
+    // Imports a previously saved cart snapshot and rejects duplicate migration IDs with differing contents.
     public CartResponse importCart(Long userId, CartRequests.ImportCart request) {
         lockUser(userId);
         SortedMap<Long, Integer> quantities = new TreeMap<>();

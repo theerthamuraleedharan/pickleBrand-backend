@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local files and database exports ###
+.DS_Store
+/backup.sql

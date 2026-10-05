@@ -9,4 +9,7 @@ public record UserProfileResponse(
         String phone,
         boolean hasProfilePhoto
 ) {
+    public UserProfileResponse withRole(String authenticatedRole) {
+        return new UserProfileResponse(id, firstName, lastName, email, authenticatedRole, phone, hasProfilePhoto);
+    }
 }

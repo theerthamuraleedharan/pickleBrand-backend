@@ -24,6 +24,7 @@ public class ProductImageController {
                 imageStorage;
     }
 
+    // Serves the product image stored on disk for the storefront or admin UI.
     @GetMapping("/{productId}/photo")
     public ResponseEntity<Resource> getProductPhoto(
             @PathVariable Long productId

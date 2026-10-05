@@ -9,6 +9,7 @@ import sujus.pickle.user.UserRepository;
 @Service
 public class AdminDashboardService {
 
+    // Provides the admin overview metrics used on the dashboard.
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 

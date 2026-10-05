@@ -19,7 +19,7 @@ public record ProductResponse(
         ProductCategory category
 ) {
 
-
+    // Converts the entity into the public API shape used by the storefront and admin screens.
     public static ProductResponse from(Product product) {
 
         String imageUrl =

@@ -14,6 +14,7 @@ public class AdminDashboardController {
         this.dashboardService = dashboardService;
     }
 
+    // Returns the aggregate counts used on the admin summary dashboard.
     @GetMapping("/summary")
     public AdminDashboardSummaryResponse getSummary() {
         return dashboardService.getSummary();

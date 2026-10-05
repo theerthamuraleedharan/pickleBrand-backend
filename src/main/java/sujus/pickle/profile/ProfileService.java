@@ -12,6 +12,7 @@ import java.util.List;
 @Service
 public class ProfileService {
 
+    // Handles user profile data, saved addresses, and profile-photo lifecycle for the logged-in user.
     private final UserRepository userRepository;
     private final UserProfileRepository profileRepository;
     private final AddressRepository addressRepository;

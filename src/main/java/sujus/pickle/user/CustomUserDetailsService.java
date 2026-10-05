@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    // Loads the local Spring Security user for password-based sign-in.
     private final UserRepository userRepository;
 
     public CustomUserDetailsService(
@@ -14,6 +15,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    // Loads the Spring Security principal for local email/password authentication.
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
@@ -25,6 +27,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                                 "User not found"
                         )
                 );
+
+        // OIDC-only accounts have no local password and cannot use the legacy login.
+        if (user.getPasswordHash() == null) {
+            throw new UsernameNotFoundException("Local password login is not available");
+        }
 
         return User
                 .withUsername(user.getEmail())
