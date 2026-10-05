@@ -17,6 +17,7 @@ import java.util.HexFormat;
 @Service
 public class RefreshTokenService {
 
+    // Refresh tokens are stored as hashes, so the raw bearer token is never kept in the database.
     private static final int TOKEN_SIZE_BYTES = 64;
 
     private final RefreshTokenRepository refreshTokenRepository;

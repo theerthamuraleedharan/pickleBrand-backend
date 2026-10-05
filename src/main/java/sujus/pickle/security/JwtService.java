@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 public class JwtService {
+    // This API signs its own JWTs for local login and refresh flows.
     public static final String ISSUER = "sujus-pickle-api";
 
     private final JwtEncoder jwtEncoder;

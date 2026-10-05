@@ -12,6 +12,7 @@ import java.util.List;
 @Service
 public class AdminProductService {
 
+    // Admin operations for listing, creating, updating, and deleting catalog products.
     private final ProductRepository productRepository;
     private final ProductImageStorageService imageStorage;
 

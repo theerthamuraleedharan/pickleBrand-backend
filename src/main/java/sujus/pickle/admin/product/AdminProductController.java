@@ -19,6 +19,7 @@ public class AdminProductController {
         this.service = service;
     }
 
+    // Lists every catalog product for the admin dashboard and product management screens.
     @GetMapping
     public List<AdminProductResponse>
     getProducts() {
@@ -26,6 +27,7 @@ public class AdminProductController {
         return service.getProducts();
     }
 
+    // Reads one product record for admin editing or inspection.
     @GetMapping("/{productId}")
     public AdminProductResponse getProduct(
             @PathVariable Long productId
@@ -35,6 +37,7 @@ public class AdminProductController {
         );
     }
 
+    // Creates a catalog item and optionally uploads a product image in the same multipart request.
     @PostMapping(
             consumes =
                     MediaType.MULTIPART_FORM_DATA_VALUE
@@ -58,6 +61,7 @@ public class AdminProductController {
         );
     }
 
+    // Updates a product's details and replaces the image if a new photo is supplied.
     @PutMapping(
             value = "/{productId}",
             consumes =
@@ -84,6 +88,7 @@ public class AdminProductController {
         );
     }
 
+    // Deletes a product and its related image from the catalog.
     @DeleteMapping("/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(

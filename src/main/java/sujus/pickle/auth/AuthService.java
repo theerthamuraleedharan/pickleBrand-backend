@@ -16,6 +16,7 @@ import java.util.Locale;
 @Service
 public class AuthService {
 
+    // Handles local registration, login, refresh, and logout for application users.
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -39,6 +40,7 @@ public class AuthService {
         this.refreshTokenService = refreshTokenService;
     }
 
+    // Registers a new local customer and issues both a JWT and a refresh token for the session.
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         String email = normalizeEmail(request.email());
@@ -74,6 +76,7 @@ public class AuthService {
         );
     }
 
+    // Authenticates the user using the local password flow and rotates a new refresh token.
     @Transactional
     public AuthResponse login(LoginRequest request) {
         String email = normalizeEmail(request.email());
@@ -108,6 +111,7 @@ public class AuthService {
         );
     }
 
+    // Exchanges a valid refresh token for a new access token and a rotated refresh token.
     @Transactional
     public AuthResponse refresh(
             RefreshTokenRequest request
@@ -128,6 +132,7 @@ public class AuthService {
         );
     }
 
+    // Revokes the supplied refresh token so the user cannot continue the session.
     @Transactional
     public void logout(
             RefreshTokenRequest request

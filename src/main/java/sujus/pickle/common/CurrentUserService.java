@@ -8,9 +8,12 @@ import sujus.pickle.user.UserRepository;
 
 @Service
 public class CurrentUserService {
+    // Resolves the local application user from the currently authenticated principal.
     private final UserRepository users;
     public CurrentUserService(UserRepository users) { this.users = users; }
 
+    // Returns the visible user identity and role for the active request.
+    // Reads the current authenticated user record and keeps the effective role from the active token.
     public Account get(Authentication authentication) {
         var user = users.findById(CurrentUser.id(authentication)).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please log in again"));

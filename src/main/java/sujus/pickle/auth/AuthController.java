@@ -15,6 +15,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    // Registers a new local customer account and returns the initial JWT pair.
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Transactional
@@ -24,6 +25,7 @@ public class AuthController {
         return authService.register(request);
     }
 
+    // Authenticates the user with email and password and issues a fresh access token.
     @PostMapping("/login")
     public AuthResponse login(
             @Valid @RequestBody LoginRequest request
@@ -31,6 +33,7 @@ public class AuthController {
         return authService.login(request);
     }
 
+    // Exchanges a refresh token for a new access token and rotated refresh token.
     @PostMapping("/refresh")
     public AuthResponse refresh(
             @Valid @RequestBody RefreshTokenRequest request
@@ -38,6 +41,7 @@ public class AuthController {
         return authService.refresh(request);
     }
 
+    // Revokes the supplied refresh token and ends the current session.
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(

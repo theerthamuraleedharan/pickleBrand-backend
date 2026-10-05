@@ -22,6 +22,7 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
+    // Returns the current user's profile plus the role from the active token.
     @GetMapping
     public UserProfileResponse getProfile(
             Authentication authentication
@@ -31,6 +32,7 @@ public class ProfileController {
         ).withRole(CurrentUser.role(authentication));
     }
 
+    // Updates the user's display name and profile contact fields.
     @PutMapping
     public UserProfileResponse updateProfile(
             Authentication authentication,
@@ -43,6 +45,7 @@ public class ProfileController {
         ).withRole(CurrentUser.role(authentication));
     }
 
+    // Uploads a new profile image and stores it in the configured filesystem path.
     @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UserProfileResponse uploadPhoto(
             Authentication authentication,
@@ -54,6 +57,7 @@ public class ProfileController {
         ).withRole(CurrentUser.role(authentication));
     }
 
+    // Reads the current user's uploaded profile photo.
     @GetMapping("/photo")
     public ResponseEntity<Resource> getPhoto(Authentication authentication) {
         ProfileImageStorageService.StoredImage image = profileService.getPhoto(CurrentUser.id(authentication));
@@ -67,6 +71,7 @@ public class ProfileController {
                 .body(image.resource());
     }
 
+    // Deletes the current user's profile photo.
     @DeleteMapping("/photo")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePhoto(
@@ -77,6 +82,7 @@ public class ProfileController {
         );
     }
 
+    // Returns all saved addresses for the authenticated user.
     @GetMapping("/addresses")
     public List<AddressResponse> getAddresses(
             Authentication authentication
@@ -86,6 +92,7 @@ public class ProfileController {
         );
     }
 
+    // Creates a new saved address for the authenticated user.
     @PostMapping("/addresses")
     @ResponseStatus(HttpStatus.CREATED)
     public AddressResponse createAddress(
@@ -99,6 +106,7 @@ public class ProfileController {
         );
     }
 
+    // Updates an existing saved address and optionally changes the default address flag.
     @PutMapping("/addresses/{addressId}")
     public AddressResponse updateAddress(
             Authentication authentication,
@@ -113,6 +121,7 @@ public class ProfileController {
         );
     }
 
+    // Deletes one saved address for the current user.
     @DeleteMapping("/addresses/{addressId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAddress(

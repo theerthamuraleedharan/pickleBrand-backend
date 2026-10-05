@@ -13,6 +13,7 @@ public class AdminController {
     private final CurrentUserService currentUser;
     public AdminController(CurrentUserService currentUser) { this.currentUser = currentUser; }
 
+    // Returns the basic overview data shown on the admin dashboard for the active user.
     @GetMapping("/dashboard")
     public Map<String, Object> getDashboard(Authentication authentication) {
         var user = currentUser.get(authentication);

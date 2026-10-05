@@ -15,6 +15,7 @@ import java.util.UUID;
 @Service
 public class ProductImageStorageService {
 
+    // Stores catalog images with validation for size and supported formats.
     private static final long MAX_SIZE =
             5L * 1024L * 1024L;
 

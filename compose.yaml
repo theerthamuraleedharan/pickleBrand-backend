@@ -1,6 +1,4 @@
 services:
-  # Local interview/demo IdP. Opt in with: docker compose --profile oidc up -d
-  # start-dev and these published demo passwords are not a production deployment.
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.4
     profiles: [oidc]

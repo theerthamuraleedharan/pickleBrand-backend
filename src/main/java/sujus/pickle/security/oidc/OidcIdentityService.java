@@ -14,6 +14,7 @@ import java.util.Objects;
 @Service
 @Profile("oidc")
 public class OidcIdentityService {
+    // Maps an external OIDC subject to the local app user and handles first-login provisioning.
     private final ExternalIdentityRepository identities;
     private final UserRepository users;
     private final TransactionTemplate transactions;
@@ -25,6 +26,7 @@ public class OidcIdentityService {
         this.transactions = new TransactionTemplate(transactionManager);
     }
 
+    // Resolves the local user tied to this external OIDC identity and creates a first-time user if needed.
     public Long resolveUserId(Jwt jwt) {
         String issuer = jwt.getClaimAsString("iss");
         String subject = jwt.getSubject();
@@ -38,6 +40,7 @@ public class OidcIdentityService {
         }
     }
 
+    // Finds a linked OIDC account or creates a brand-new app user if the identity is first seen.
     private Long resolveOrCreate(Jwt jwt, String issuer, String subject) {
         var existing = identities.findByIssuerAndSubject(issuer, subject);
         if (existing.isPresent()) return existing.get().getUserId();
@@ -60,6 +63,7 @@ public class OidcIdentityService {
         return user.getId();
     }
 
+    // Extracts a single claim value safely and keeps the user's display name within app limits.
     private String name(Jwt jwt, String claim) {
         String value = jwt.getClaimAsString(claim);
         if (value == null) return "";

@@ -15,6 +15,7 @@ import java.util.UUID;
 @Service
 public class ProfileImageStorageService {
 
+    // Stores and serves user profile images under a controlled filesystem location.
     private static final long MAX_FILE_SIZE =
             2L * 1024L * 1024L;
 

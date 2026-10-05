@@ -13,6 +13,7 @@ public class CurrentUserController {
     private final CurrentUserService users;
     public CurrentUserController(CurrentUserService users) { this.users = users; }
 
+    // Returns the current authenticated user for the frontend session state and profile access.
     @GetMapping("/me")
     public CurrentUserService.Account getCurrentUser(
             Authentication authentication
